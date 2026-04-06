@@ -27,6 +27,19 @@ jobs:
             --username ${{ github.actor }} \
             --password ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check version does not already exist
+        run: |
+          CHART_VERSION=$(grep '^version:' app-base/Chart.yaml | awk '{print $2}')
+          echo "Chart version: $CHART_VERSION"
+          if helm pull \
+            oci://ghcr.io/${{ github.repository_owner }}/helm-charts/app-base \
+            --version "$CHART_VERSION" \
+            --destination /tmp 2>/dev/null; then
+            echo "ERROR: version $CHART_VERSION already exists in the registry. Bump the version in Chart.yaml."
+            exit 1
+          fi
+          echo "Version $CHART_VERSION is new — proceeding."
+
       - name: Package chart
         run: helm package app-base --destination /tmp/charts
 
