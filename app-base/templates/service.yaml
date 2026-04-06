@@ -11,9 +11,17 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
+    {{- if .Values.service.ports }}
+    {{- toYaml .Values.service.ports | nindent 4 }}
+    {{- else }}
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.containerPort | default .Values.service.port }}
       protocol: TCP
       name: http
+    {{- end }}
+  {{- with .Values.service.externalIPs }}
+  externalIPs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     {{- include "chart.selectorLabels" . | nindent 4 }}

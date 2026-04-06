@@ -50,6 +50,18 @@ service:
   # Override if the container listens on a different port than the service exposes
   containerPort: ""
   annotations: {}
+  # Optional: define multiple ports (overrides the single port above)
+  # ports:
+  #   - name: udp-port
+  #     protocol: UDP
+  #     port: 9987
+  #     targetPort: 9987
+  #   - name: tcp-port1
+  #     protocol: TCP
+  #     port: 30033
+  #     targetPort: 30033
+  # Optional: expose the service on specific node IPs
+  externalIPs: []
 
 ingress:
   enabled: false
