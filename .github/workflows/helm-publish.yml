@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "helm-charts/app-base/**"
+      - "app-base/**"
 
 jobs:
   publish:
@@ -28,7 +28,7 @@ jobs:
             --password ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package chart
-        run: helm package helm-charts/app-base --destination /tmp/charts
+        run: helm package app-base --destination /tmp/charts
 
       - name: Push chart
         run: |
