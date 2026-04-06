@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "chart.labels" . | nindent 4 }}
 spec:
-  revisionHistoryLimit: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -28,6 +28,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ .Values.serviceAccount.name | default (include "chart.fullname" .) }}
       {{- end }}
@@ -85,8 +86,32 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-        {{- with .Values.extraContainers }}
-        {{- toYaml . | nindent 8 }}
+        {{- if .Values.vpn.enabled }}
+        - name: vpn
+          image: "{{ .Values.vpn.image.repository }}:{{ .Values.vpn.image.tag }}"
+          imagePullPolicy: {{ .Values.vpn.image.pullPolicy }}
+          {{- with .Values.vpn.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.vpn.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- if .Values.vpn.securityContext.privileged }}
+            privileged: true
+            {{- end }}
+            {{- with .Values.vpn.securityContext.capabilities }}
+            capabilities:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.vpn.resources | nindent 12 }}
+          {{- with .Values.vpn.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- end }}
       {{- with .Values.volumes }}
       volumes:

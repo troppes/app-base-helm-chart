@@ -1,4 +1,5 @@
 replicaCount: 1
+revisionHistoryLimit: 1
 
 image:
   repository: ""
@@ -11,31 +12,30 @@ fullnameOverride: ""
 podAnnotations: {}
 podLabels: {}
 
-# Default resource limits — override per app in its own values.yaml
 resources:
   requests:
     cpu: 50m
     memory: 128Mi
+    ephemeral-storage: 100Mi
   limits:
     cpu: 500m
     memory: 512Mi
+    ephemeral-storage: 1Gi
 
-# Recreate is often better for single-pod stateful apps with volume mounts
 updateStrategy:
   type: RollingUpdate
 
 serviceAccount:
   create: false
+  automountToken: false
   name: ""
   annotations: {}
 
-# Pod-level security context — set fsGroup when the app writes to volumes as a specific group
 podSecurityContext: {}
   # fsGroup: 1000
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# Container-level security context
 securityContext:
   allowPrivilegeEscalation: false
   # capabilities:
@@ -58,7 +58,6 @@ ingress:
   hosts: []
   tls: []
 
-# Override container entrypoint and arguments
 command: []
 args: []
 
@@ -68,13 +67,33 @@ envFrom: []
 volumes: []
 volumeMounts: []
 
-# Init containers — run to completion before the main container starts
 initContainers: []
 
-# Extra sidecar containers (e.g. VPN, exporters) — raw container specs
-extraContainers: []
+vpn:
+  enabled: false
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: Always
+  env: []
+  envFrom: []
+  securityContext:
+    privileged: false
+    capabilities:
+      add:
+        - NET_ADMIN
+        - SYS_MODULE
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+      ephemeral-storage: 100Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+      ephemeral-storage: 256Mi
+  volumeMounts: []
 
-# Optional probes — any probe type works (httpGet, exec, tcpSocket, grpc)
 probes:
   liveness:
     enabled: false
