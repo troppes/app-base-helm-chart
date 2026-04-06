@@ -13,7 +13,7 @@ version: 0.1.0
 dependencies:
   - name: app-base
     version: "0.1.0"
-    repository: "oci://ghcr.io/<your-username>/helm-charts"
+    repository: "oci://ghcr.io/troppes/helm-charts"
 ```
 
 **`values.yaml`** — all config goes under the `app-base:` key:
