@@ -1,0 +1,5 @@
+apiVersion: v2
+name: app-base
+description: Shared library chart for all simple app deployments
+type: application
+version: 0.1.0

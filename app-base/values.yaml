@@ -1,0 +1,97 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+podAnnotations: {}
+podLabels: {}
+
+# Default resource limits — override per app in its own values.yaml
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Recreate is often better for single-pod stateful apps with volume mounts
+updateStrategy:
+  type: RollingUpdate
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+# Pod-level security context — set fsGroup when the app writes to volumes as a specific group
+podSecurityContext: {}
+  # fsGroup: 1000
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Container-level security context
+securityContext:
+  allowPrivilegeEscalation: false
+  # capabilities:
+  #   drop: [ALL]
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  # readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 80
+  # Override if the container listens on a different port than the service exposes
+  containerPort: ""
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+# Override container entrypoint and arguments
+command: []
+args: []
+
+env: []
+envFrom: []
+
+volumes: []
+volumeMounts: []
+
+# Init containers — run to completion before the main container starts
+initContainers: []
+
+# Extra sidecar containers (e.g. VPN, exporters) — raw container specs
+extraContainers: []
+
+# Optional probes — any probe type works (httpGet, exec, tcpSocket, grpc)
+probes:
+  liveness:
+    enabled: false
+    httpGet:
+      path: /
+      port: http
+  readiness:
+    enabled: false
+    httpGet:
+      path: /
+      port: http
+  startup:
+    enabled: false
+    httpGet:
+      path: /
+      port: http
+    failureThreshold: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    initialDelaySeconds: 0
