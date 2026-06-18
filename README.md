@@ -52,6 +52,7 @@ helm dependency update
 | Key | Default | Description |
 |---|---|---|
 | `replicaCount` | `1` | Number of replicas |
+| `revisionHistoryLimit` | `1` | Number of old ReplicaSets to retain |
 | `updateStrategy.type` | `RollingUpdate` | Deployment update strategy (`RollingUpdate` or `Recreate`) |
 | `command` | `[]` | Override container entrypoint |
 | `args` | `[]` | Override container arguments |
@@ -65,6 +66,7 @@ helm dependency update
 | Key | Default | Description |
 |---|---|---|
 | `serviceAccount.create` | `false` | Create a ServiceAccount |
+| `serviceAccount.automountToken` | `false` | Automount the ServiceAccount token |
 | `serviceAccount.name` | `""` | Name (defaults to release fullname) |
 | `serviceAccount.annotations` | `{}` | ServiceAccount annotations |
 
@@ -94,6 +96,7 @@ Additional container security context fields (`runAsUser`, `readOnlyRootFilesyst
 | `service.port` | `80` | Service (and container) port |
 | `service.containerPort` | `""` | Override if container port differs from service port |
 | `service.annotations` | `{}` | Service annotations |
+| `service.externalIPs` | `[]` | Expose the service on specific node IPs |
 
 ### Ingress
 
@@ -134,7 +137,22 @@ All probe types are supported (`httpGet`, `exec`, `tcpSocket`, `grpc`).
 | Key | Default | Description |
 |---|---|---|
 | `initContainers` | `[]` | Init containers (run before the main container) |
-| `extraContainers` | `[]` | Sidecar containers (e.g. VPN, exporters) |
+
+### VPN Sidecar
+
+| Key | Default | Description |
+|---|---|---|
+| `vpn.enabled` | `false` | Enable the built-in VPN sidecar container |
+| `vpn.image.repository` | `""` | VPN container image repository |
+| `vpn.image.tag` | `""` | VPN container image tag |
+| `vpn.image.pullPolicy` | `Always` | VPN image pull policy |
+| `vpn.env` | `[]` | Environment variables for the VPN container |
+| `vpn.envFrom` | `[]` | ConfigMap or Secret refs via `envFrom` for the VPN container |
+| `vpn.securityContext.privileged` | `false` | Run VPN container in privileged mode |
+| `vpn.securityContext.capabilities.add` | `[NET_ADMIN, SYS_MODULE]` | Linux capabilities to add |
+| `vpn.resources` | see values.yaml | Resource requests/limits for the VPN container |
+| `vpn.volumeMounts` | `[]` | Volume mounts for the VPN container |
+| `vpn.lifecycle` | `{}` | Lifecycle hooks (`postStart`, `preStop`) for the VPN container |
 
 ## Examples
 
@@ -176,15 +194,18 @@ app-base:
 
 ```yaml
 app-base:
-  extraContainers:
-    - name: vpn
-      image: ghcr.io/qdm12/gluetun:latest
-      securityContext:
-        capabilities:
-          add: [NET_ADMIN]
-      envFrom:
-        - secretRef:
-            name: vpn-credentials
+  vpn:
+    enabled: true
+    image:
+      repository: ghcr.io/qdm12/gluetun
+      tag: latest
+    envFrom:
+      - secretRef:
+          name: vpn-credentials
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "kill -SIGTERM 1"]
 
   volumes:
     - name: vpn-config

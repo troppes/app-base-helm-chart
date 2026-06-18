@@ -95,6 +95,7 @@ vpn:
       memory: 128Mi
       ephemeral-storage: 256Mi
   volumeMounts: []
+  lifecycle: {}
 
 probes:
   liveness:
